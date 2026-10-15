@@ -43,12 +43,7 @@ export default async function Dashboard() {
       <div className="bg-gradient-to-r from-indigo-600 to-violet-600 rounded-3xl p-8 text-white">
         <h1 className="text-3xl font-extrabold">Academic Dashboard</h1>
         <p className="mt-2 text-indigo-100">Real-time student & performance overview · powered by Neon PostgreSQL</p>
-        <a
-          href="/api/seed"
-          className="mt-4 inline-block bg-white text-indigo-700 text-sm font-semibold px-4 py-2 rounded-full hover:bg-indigo-50 transition-colors"
-        >
-          ⚡ Initialize / Re-seed Database
-        </a>
+        
       </div>
 
       {/* Stats */}
