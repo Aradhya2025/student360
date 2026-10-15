@@ -189,7 +189,7 @@ INSERT INTO grades (student_id, course_id, marks) VALUES
   ((SELECT id FROM students WHERE roll_no='CS2402'),
    (SELECT id FROM courses  WHERE code='CS201'), 55.0),
   ((SELECT id FROM students WHERE roll_no='EC2401'),
-   (SELECT id FROM courses  WHERE code='EC101'), 81.0),
+   (SELECT id FROM courses  WHERE code='EC101'), 84.0),
   ((SELECT id FROM students WHERE roll_no='ME2401'),
    (SELECT id FROM courses  WHERE code='ME101'), 67.5),
   ((SELECT id FROM students WHERE roll_no='CS2403'),
