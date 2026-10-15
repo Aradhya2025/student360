@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Student360 – Technical Report</title>
+<style>
+  :root {
+    --indigo: #4f46e5; --violet: #7c3aed; --emerald: #10b981;
+    --rose: #f43f5e;   --amber: #f59e0b;  --slate: #64748b;
+    --bg: #f8fafc; --card: #ffffff; --border: #e2e8f0;
+    --text: #0f172a; --muted: #94a3b8;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
+  a{color:var(--indigo);text-decoration:none}
+
+  /* ── Header ── */
+  header{background:linear-gradient(135deg,var(--indigo),var(--violet));color:#fff;padding:3rem 2rem;text-align:center}
+  header h1{font-size:2.5rem;font-weight:800;letter-spacing:-.02em}
+  header p{margin-top:.5rem;opacity:.85;font-size:1.05rem}
+  .badge{display:inline-block;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);
+         border-radius:999px;padding:.25rem .9rem;font-size:.8rem;margin:.4rem .2rem}
+
+  /* ── Layout ── */
+  .container{max-width:1100px;margin:0 auto;padding:2rem 1.5rem}
+  .toc{background:var(--card);border:1px solid var(--border);border-radius:1rem;padding:1.5rem 2rem;
+       margin-bottom:2.5rem;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+  .toc h2{font-size:1rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:.8rem}
+  .toc ol{padding-left:1.2rem;display:grid;grid-template-columns:1fr 1fr;gap:.3rem .5rem}
+  .toc li{font-size:.9rem}
+
+  section{margin-bottom:3rem}
+  h2.sec{font-size:1.5rem;font-weight:700;color:var(--indigo);border-bottom:2px solid var(--border);
+          padding-bottom:.5rem;margin-bottom:1.5rem}
+  h3.sub{font-size:1.1rem;font-weight:600;color:var(--violet);margin:1.2rem 0 .6rem}
+  p{margin-bottom:.8rem;color:#334155}
+
+  /* ── Cards ── */
+  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1rem;margin-bottom:1.5rem}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:.875rem;padding:1.25rem;
+        box-shadow:0 1px 3px rgba(0,0,0,.06);transition:box-shadow .2s}
+  .card:hover{box-shadow:0 4px 16px rgba(79,70,229,.12)}
+  .card-icon{font-size:1.8rem;margin-bottom:.5rem}
+  .card h4{font-size:.95rem;font-weight:700;color:var(--text)}
+  .card p{font-size:.82rem;color:var(--muted);margin:0}
+  .tag{display:inline-block;font-size:.7rem;font-weight:600;padding:.15rem .6rem;border-radius:999px;margin:.15rem}
+  .tag-pk{background:#ede9fe;color:var(--violet)} .tag-fk{background:#fef3c7;color:#92400e}
+  .tag-uq{background:#ecfdf5;color:var(--emerald)} .tag-nn{background:#f0f9ff;color:#0369a1}
+  .tag-ck{background:#fff7ed;color:#9a3412}
+
+  /* ── Table ── */
+  table{width:100%;border-collapse:collapse;font-size:.85rem;margin-bottom:1.5rem}
+  th{background:#f1f5f9;text-align:left;padding:.6rem .9rem;font-size:.75rem;
+     text-transform:uppercase;letter-spacing:.06em;color:var(--slate)}
+  td{padding:.65rem .9rem;border-top:1px solid var(--border)}
+  tr:hover td{background:#fafbff}
+
+  /* ── Code ── */
+  pre{background:#1e1e2e;color:#cdd6f4;border-radius:.75rem;padding:1.25rem 1.5rem;
+      font-size:.82rem;line-height:1.7;overflow-x:auto;margin-bottom:1.2rem}
+  code{font-family:'Cascadia Code','Fira Code',monospace}
+  .kw{color:#cba6f7} .fn{color:#89dceb} .cm{color:#6c7086;font-style:italic}
+  .st{color:#a6e3a1} .nu{color:#fab387}
+
+  /* ── ER Diagram (SVG embed) ── */
+  .er-wrap{background:var(--card);border:1px solid var(--border);border-radius:1rem;
+           padding:2rem;overflow-x:auto;margin-bottom:1.5rem}
+  .er-wrap svg{display:block;margin:auto}
+
+  /* ── NF table ── */
+  .nf-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
+  .nf-card{background:var(--card);border:1px solid var(--border);border-radius:.875rem;padding:1.2rem}
+  .nf-card h4{font-size:.9rem;font-weight:700;color:var(--indigo);margin-bottom:.5rem}
+  .nf-card ul{padding-left:1rem;font-size:.82rem;color:#334155}
+
+  /* ── API table ── */
+  .method{display:inline-block;font-size:.7rem;font-weight:700;padding:.15rem .5rem;
+          border-radius:.3rem;color:#fff;margin-right:.4rem}
+  .GET{background:var(--emerald)} .POST{background:var(--indigo)}
+
+  @media(max-width:640px){
+    .toc ol{grid-template-columns:1fr}
+    .nf-grid{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div style="font-size:3rem;margin-bottom:.5rem">🎓</div>
+  <h1>Student360</h1>
+  <p>Student Information &amp; Academic Performance Management System</p>
+  <p style="margin-top:1rem">
+    <span class="badge">Next.js 16</span>
+    <span class="badge">PostgreSQL / Neon</span>
+    <span class="badge">PL/pgSQL</span>
+    <span class="badge">Tailwind v4</span>
+    <span class="badge">TypeScript</span>
+    <span class="badge">ISR Cache</span>
+  </p>
+</header>
+
+<div class="container">
+
+  <!-- TOC -->
+  <div class="toc">
+    <h2>Table of Contents</h2>
+    <ol>
+      <li><a href="#overview">System Overview</a></li>
+      <li><a href="#er">ER Diagram</a></li>
+      <li><a href="#normalisation">Normalisation (1NF→3NF)</a></li>
+      <li><a href="#entities">Entities &amp; Attributes</a></li>
+      <li><a href="#ddl">DDL – Schema</a></li>
+      <li><a href="#views">SQL Views</a></li>
+      <li><a href="#procedures">PL/pgSQL Procedures</a></li>
+      <li><a href="#dml">DML – Seed Data</a></li>
+      <li><a href="#joins">Joins Used</a></li>
+      <li><a href="#api">API Reference</a></li>
+      <li><a href="#cache">Caching Strategy</a></li>
+      <li><a href="#ui">UI Architecture</a></li>
+    </ol>
+  </div>
+
+  <!-- OVERVIEW -->
+  <section id="overview">
+    <h2 class="sec">1. System Overview</h2>
+    <p>Student360 is a full-stack academic management system built on <strong>Next.js 16 App Router</strong>
+    and <strong>Neon serverless PostgreSQL</strong>. It demonstrates core RDBMS concepts including
+    normalised schema design, DDL/DML, Views, JOIN queries, PL/pgSQL stored procedures and functions,
+    and server-side ISR caching to minimise database round-trips.</p>
+
+    <div class="cards">
+      <div class="card"><div class="card-icon">🏛️</div><h4>4 Entities</h4><p>departments, students, courses, grades</p></div>
+      <div class="card"><div class="card-icon">👁️</div><h4>2 SQL Views</h4><p>v_student_academic · v_course_stats</p></div>
+      <div class="card"><div class="card-icon">⚙️</div><h4>2 PL/pgSQL Routines</h4><p>sp_enrol_student · fn_promote_student</p></div>
+      <div class="card"><div class="card-icon">⚡</div><h4>ISR Caching</h4><p>30 s revalidation on list endpoints</p></div>
+      <div class="card"><div class="card-icon">🔒</div><h4>Secure Credentials</h4><p>DB URL only in server env vars</p></div>
+      <div class="card"><div class="card-icon">📐</div><h4>3NF Normalised</h4><p>No data redundancy · clean FKs</p></div>
+    </div>
+  </section>
+
+  <!-- ER DIAGRAM -->
+  <section id="er">
+    <h2 class="sec">2. ER Diagram</h2>
+    <div class="er-wrap">
+      <svg viewBox="0 0 880 480" width="840" font-family="'Segoe UI',sans-serif" font-size="13">
+
+        <!-- ── DEPARTMENTS ── -->
+        <rect x="20" y="160" width="180" height="160" rx="8" fill="#ede9fe" stroke="#7c3aed" stroke-width="2"/>
+        <rect x="20" y="160" width="180" height="36" rx="8" fill="#7c3aed"/>
+        <text x="110" y="184" text-anchor="middle" fill="white" font-weight="700" font-size="14">DEPARTMENTS</text>
+        <text x="35" y="214" fill="#4c1d95" font-size="12">🔑 id (PK)</text>
+        <text x="35" y="234" fill="#4c1d95" font-size="12">📝 name (UNIQUE)</text>
+        <text x="35" y="254" fill="#4c1d95" font-size="12">📝 code (UNIQUE)</text>
+        <text x="35" y="274" fill="#4c1d95" font-size="12">🕐 created_at</text>
+
+        <!-- ── STUDENTS ── -->
+        <rect x="280" y="60" width="200" height="260" rx="8" fill="#e0f2fe" stroke="#0284c7" stroke-width="2"/>
+        <rect x="280" y="60" width="200" height="36" rx="8" fill="#0284c7"/>
+        <text x="380" y="84" text-anchor="middle" fill="white" font-weight="700" font-size="14">STUDENTS</text>
+        <text x="295" y="116" fill="#0c4a6e" font-size="12">🔑 id (PK)</text>
+        <text x="295" y="136" fill="#0c4a6e" font-size="12">📝 roll_no (UNIQUE)</text>
+        <text x="295" y="156" fill="#0c4a6e" font-size="12">📝 first_name</text>
+        <text x="295" y="176" fill="#0c4a6e" font-size="12">📝 last_name</text>
+        <text x="295" y="196" fill="#0c4a6e" font-size="12">📧 email (UNIQUE)</text>
+        <text x="295" y="216" fill="#0c4a6e" font-size="12">📅 dob</text>
+        <text x="295" y="236" fill="#0c4a6e" font-size="12">🔗 dept_id (FK)</text>
+        <text x="295" y="256" fill="#0c4a6e" font-size="12">🔢 semester</text>
+        <text x="295" y="276" fill="#0c4a6e" font-size="12">📅 enrolled_at</text>
+        <text x="295" y="296" fill="#0c4a6e" font-size="12">✅ status</text>
+
+        <!-- ── COURSES ── -->
+        <rect x="280" y="380" width="200" height="80" rx="8" fill="#fef9c3" stroke="#ca8a04" stroke-width="2"/>
+        <rect x="280" y="380" width="200" height="36" rx="8" fill="#ca8a04"/>
+        <text x="380" y="404" text-anchor="middle" fill="white" font-weight="700" font-size="14">COURSES</text>
+        <text x="295" y="432" fill="#713f12" font-size="12">🔑 id (PK) · 🔗 dept_id (FK)</text>
+        <text x="295" y="452" fill="#713f12" font-size="12">name · code · credits · semester</text>
+
+        <!-- ── GRADES ── -->
+        <rect x="570" y="200" width="200" height="140" rx="8" fill="#fce7f3" stroke="#db2777" stroke-width="2"/>
+        <rect x="570" y="200" width="200" height="36" rx="8" fill="#db2777"/>
+        <text x="670" y="224" text-anchor="middle" fill="white" font-weight="700" font-size="14">GRADES</text>
+        <text x="585" y="256" fill="#831843" font-size="12">🔑 id (PK)</text>
+        <text x="585" y="276" fill="#831843" font-size="12">🔗 student_id (FK)</text>
+        <text x="585" y="296" fill="#831843" font-size="12">🔗 course_id (FK)</text>
+        <text x="585" y="316" fill="#831843" font-size="12">marks · grade · exam_date</text>
+
+        <!-- ── RELATIONSHIPS ── -->
+        <!-- departments → students (1:N) -->
+        <line x1="200" y1="215" x2="280" y2="190" stroke="#7c3aed" stroke-width="2" stroke-dasharray="6,3"/>
+        <text x="230" y="195" fill="#7c3aed" font-size="11" font-weight="600">1 : N</text>
+
+        <!-- departments → courses (1:N) -->
+        <line x1="200" y1="260" x2="280" y2="410" stroke="#ca8a04" stroke-width="2" stroke-dasharray="6,3"/>
+        <text x="205" y="350" fill="#ca8a04" font-size="11" font-weight="600">1 : N</text>
+
+        <!-- students → grades (1:N) -->
+        <line x1="480" y1="200" x2="570" y2="260" stroke="#db2777" stroke-width="2" stroke-dasharray="6,3"/>
+        <text x="510" y="225" fill="#db2777" font-size="11" font-weight="600">1 : N</text>
+
+        <!-- courses → grades (1:N) -->
+        <line x1="480" y1="420" x2="570" y2="320" stroke="#db2777" stroke-width="2" stroke-dasharray="6,3"/>
+        <text x="525" y="375" fill="#db2777" font-size="11" font-weight="600">1 : N</text>
+
+        <!-- Cardinality labels -->
+        <text x="30" y="155" fill="#7c3aed" font-size="10">One department has many students &amp; courses</text>
+        <text x="580" y="190" fill="#db2777" font-size="10">grades (student_id, course_id) UNIQUE</text>
+      </svg>
+    </div>
+    <p><strong>Relationship Summary:</strong> One <em>Department</em> → Many <em>Students</em>;
+    One <em>Department</em> → Many <em>Courses</em>;
+    One <em>Student</em> → Many <em>Grades</em>;
+    One <em>Course</em> → Many <em>Grades</em>.
+    The <code>grades</code> table resolves the M:N relationship between <em>Students</em> and <em>Courses</em>.</p>
+  </section>
+
+  <!-- NORMALISATION -->
+  <section id="normalisation">
+    <h2 class="sec">3. Normalisation (1NF → 3NF)</h2>
+    <div class="nf-grid">
+      <div class="nf-card">
+        <h4>1NF – First Normal Form</h4>
+        <ul>
+          <li>All attributes are atomic (single-valued)</li>
+          <li>No repeating groups</li>
+          <li>Every table has a primary key</li>
+          <li>e.g. <code>grades.marks</code> is a scalar NUMERIC, not a CSV</li>
+        </ul>
+      </div>
+      <div class="nf-card">
+        <h4>2NF – Second Normal Form</h4>
+        <ul>
+          <li>In 1NF + no partial dependencies</li>
+          <li><code>grades(student_id, course_id)</code> composite key → marks depends on BOTH</li>
+          <li>Department name moved out of <code>students</code> into <code>departments</code></li>
+        </ul>
+      </div>
+      <div class="nf-card">
+        <h4>3NF – Third Normal Form</h4>
+        <ul>
+          <li>In 2NF + no transitive dependencies</li>
+          <li>Grade letter computed by DB (GENERATED ALWAYS) — not stored separately</li>
+          <li>dept code never repeated in <code>students</code>; accessed via FK join</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ENTITIES -->
+  <section id="entities">
+    <h2 class="sec">4. Entities &amp; Attributes</h2>
+
+    <h3 class="sub">departments</h3>
+    <table>
+      <tr><th>Column</th><th>Type</th><th>Constraints</th><th>Description</th></tr>
+      <tr><td>id</td><td>SERIAL</td><td><span class="tag tag-pk">PK</span></td><td>Auto-increment surrogate key</td></tr>
+      <tr><td>name</td><td>VARCHAR(100)</td><td><span class="tag tag-nn">NOT NULL</span><span class="tag tag-uq">UNIQUE</span></td><td>Full department name</td></tr>
+      <tr><td>code</td><td>VARCHAR(10)</td><td><span class="tag tag-nn">NOT NULL</span><span class="tag tag-uq">UNIQUE</span></td><td>Short code e.g. CS, EC</td></tr>
+      <tr><td>created_at</td><td>TIMESTAMPTZ</td><td>DEFAULT NOW()</td><td>Row creation time</td></tr>
+    </table>
+
+    <h3 class="sub">students</h3>
+    <table>
+      <tr><th>Column</th><th>Type</th><th>Constraints</th><th>Description</th></tr>
+      <tr><td>id</td><td>SERIAL</td><td><span class="tag tag-pk">PK</span></td><td>Surrogate PK</td></tr>
+      <tr><td>roll_no</td><td>VARCHAR(20)</td><td><span class="tag tag-uq">UNIQUE</span><span class="tag tag-nn">NOT NULL</span></td><td>Institutional roll number</td></tr>
+      <tr><td>first_name / last_name</td><td>VARCHAR(60)</td><td><span class="tag tag-nn">NOT NULL</span></td><td>Student name (split for sorting)</td></tr>
+      <tr><td>email</td><td>VARCHAR(120)</td><td><span class="tag tag-uq">UNIQUE</span><span class="tag tag-nn">NOT NULL</span></td><td>Institutional email</td></tr>
+      <tr><td>dob</td><td>DATE</td><td></td><td>Date of birth</td></tr>
+      <tr><td>dept_id</td><td>INT</td><td><span class="tag tag-fk">FK → departments</span></td><td>Department reference</td></tr>
+      <tr><td>semester</td><td>SMALLINT</td><td>DEFAULT 1</td><td>Current semester (1–8)</td></tr>
+      <tr><td>status</td><td>VARCHAR(20)</td><td>CHECK IN (active, inactive, graduated)</td><td>Enrolment status</td></tr>
+    </table>
+
+    <h3 class="sub">courses</h3>
+    <table>
+      <tr><th>Column</th><th>Type</th><th>Constraints</th><th>Description</th></tr>
+      <tr><td>id</td><td>SERIAL</td><td><span class="tag tag-pk">PK</span></td><td>Surrogate PK</td></tr>
+      <tr><td>dept_id</td><td>INT</td><td><span class="tag tag-fk">FK → departments</span></td><td>Owning department</td></tr>
+      <tr><td>name / code</td><td>VARCHAR</td><td><span class="tag tag-uq">code UNIQUE</span></td><td>Course name &amp; short code</td></tr>
+      <tr><td>credits</td><td>SMALLINT</td><td>CHECK 1–6</td><td>Credit hours</td></tr>
+      <tr><td>semester</td><td>SMALLINT</td><td>CHECK 1–8</td><td>Offered in semester</td></tr>
+    </table>
+
+    <h3 class="sub">grades</h3>
+    <table>
+      <tr><th>Column</th><th>Type</th><th>Constraints</th><th>Description</th></tr>
+      <tr><td>id</td><td>SERIAL</td><td><span class="tag tag-pk">PK</span></td><td>Surrogate PK</td></tr>
+      <tr><td>student_id</td><td>INT</td><td><span class="tag tag-fk">FK → students</span></td><td>Student reference</td></tr>
+      <tr><td>course_id</td><td>INT</td><td><span class="tag tag-fk">FK → courses</span></td><td>Course reference</td></tr>
+      <tr><td>marks</td><td>NUMERIC(5,2)</td><td>CHECK 0–100</td><td>Exam marks</td></tr>
+      <tr><td>grade</td><td>CHAR(2)</td><td>GENERATED ALWAYS (stored)</td><td>Computed letter grade</td></tr>
+      <tr><td>exam_date</td><td>DATE</td><td>DEFAULT CURRENT_DATE</td><td>Examination date</td></tr>
+    </table>
+  </section>
+
+  <!-- DDL -->
+  <section id="ddl">
+    <h2 class="sec">5. DDL – Schema Highlights</h2>
+    <pre><code><span class="cm">-- Generated column: grade auto-computed from marks</span>
+<span class="kw">CREATE TABLE</span> grades (
+  id         <span class="fn">SERIAL</span> <span class="kw">PRIMARY KEY</span>,
+  student_id <span class="fn">INT</span> <span class="kw">NOT NULL REFERENCES</span> students(id) <span class="kw">ON DELETE CASCADE</span>,
+  course_id  <span class="fn">INT</span> <span class="kw">NOT NULL REFERENCES</span> courses(id)  <span class="kw">ON DELETE CASCADE</span>,
+  marks      <span class="fn">NUMERIC</span>(<span class="nu">5</span>,<span class="nu">2</span>) <span class="kw">NOT NULL CHECK</span> (marks <span class="kw">BETWEEN</span> <span class="nu">0</span> <span class="kw">AND</span> <span class="nu">100</span>),
+  grade      <span class="fn">CHAR</span>(<span class="nu">2</span>) <span class="kw">GENERATED ALWAYS AS</span> (
+               <span class="kw">CASE</span>
+                 <span class="kw">WHEN</span> marks &gt;= <span class="nu">90</span> <span class="kw">THEN</span> <span class="st">'A+'</span>
+                 <span class="kw">WHEN</span> marks &gt;= <span class="nu">80</span> <span class="kw">THEN</span> <span class="st">'A'</span>
+                 <span class="kw">WHEN</span> marks &gt;= <span class="nu">70</span> <span class="kw">THEN</span> <span class="st">'B+'</span>
+                 <span class="kw">WHEN</span> marks &gt;= <span class="nu">60</span> <span class="kw">THEN</span> <span class="st">'B'</span>
+                 <span class="kw">WHEN</span> marks &gt;= <span class="nu">50</span> <span class="kw">THEN</span> <span class="st">'C'</span>
+                 <span class="kw">ELSE</span> <span class="st">'F'</span>
+               <span class="kw">END</span>
+             ) <span class="kw">STORED</span>,
+  exam_date  <span class="fn">DATE</span> <span class="kw">NOT NULL DEFAULT</span> <span class="fn">CURRENT_DATE</span>,
+  <span class="kw">UNIQUE</span> (student_id, course_id)
+);</code></pre>
+  </section>
+
+  <!-- VIEWS -->
+  <section id="views">
+    <h2 class="sec">6. SQL Views</h2>
+
+    <h3 class="sub">v_student_academic</h3>
+    <p>Joins <code>students ⟶ departments ⟶ grades</code> to produce a single flat row per student
+    with CGPA, courses attempted, and backlog count. Used by the dashboard and student list API (ISR cached).</p>
+    <pre><code><span class="kw">CREATE OR REPLACE VIEW</span> v_student_academic <span class="kw">AS</span>
+<span class="kw">SELECT</span>
+  s.id            <span class="kw">AS</span> student_id,
+  s.roll_no, s.first_name || <span class="st">' '</span> || s.last_name <span class="kw">AS</span> full_name,
+  s.email, s.semester, s.status,
+  d.name          <span class="kw">AS</span> department, d.code <span class="kw">AS</span> dept_code,
+  <span class="fn">COUNT</span>(g.id)     <span class="kw">AS</span> courses_attempted,
+  <span class="fn">ROUND</span>(<span class="fn">AVG</span>(g.marks)::<span class="fn">NUMERIC</span>, <span class="nu">2</span>) <span class="kw">AS</span> cgpa,
+  <span class="fn">SUM</span>(<span class="kw">CASE WHEN</span> g.grade = <span class="st">'F '</span> <span class="kw">THEN</span> <span class="nu">1</span> <span class="kw">ELSE</span> <span class="nu">0</span> <span class="kw">END</span>) <span class="kw">AS</span> backlogs
+<span class="kw">FROM</span> students s
+<span class="kw">JOIN</span>  departments d <span class="kw">ON</span> d.id = s.dept_id
+<span class="kw">LEFT JOIN</span> grades g <span class="kw">ON</span> g.student_id = s.id
+<span class="kw">GROUP BY</span> s.id, d.id;</code></pre>
+
+    <h3 class="sub">v_course_stats</h3>
+    <p>Aggregates enrolment count, average/highest/lowest marks per course joined with department info.</p>
+  </section>
+
+  <!-- PROCEDURES -->
+  <section id="procedures">
+    <h2 class="sec">7. PL/pgSQL Procedures &amp; Functions</h2>
+
+    <h3 class="sub">sp_enrol_student (PROCEDURE)</h3>
+    <p>Called from the Grades API via <code>CALL sp_enrol_student(sid, cid, marks)</code>.
+    Validates student and course existence, then UPSERTS a grade row.</p>
+    <pre><code><span class="kw">CREATE OR REPLACE PROCEDURE</span> <span class="fn">sp_enrol_student</span>(
+  p_student_id <span class="fn">INT</span>, p_course_id <span class="fn">INT</span>, p_marks <span class="fn">NUMERIC</span>
+) <span class="kw">LANGUAGE</span> plpgsql <span class="kw">AS</span> $$
+<span class="kw">BEGIN</span>
+  <span class="kw">IF NOT EXISTS</span> (<span class="kw">SELECT</span> <span class="nu">1</span> <span class="kw">FROM</span> students <span class="kw">WHERE</span> id = p_student_id) <span class="kw">THEN</span>
+    <span class="kw">RAISE EXCEPTION</span> <span class="st">'Student % not found'</span>, p_student_id;
+  <span class="kw">END IF</span>;
+  <span class="kw">INSERT INTO</span> grades (student_id, course_id, marks)
+  <span class="kw">VALUES</span> (p_student_id, p_course_id, p_marks)
+  <span class="kw">ON CONFLICT</span> (student_id, course_id)
+  <span class="kw">DO UPDATE SET</span> marks = <span class="kw">EXCLUDED</span>.marks, exam_date = <span class="fn">CURRENT_DATE</span>;
+<span class="kw">END</span>;
+$$;</code></pre>
+
+    <h3 class="sub">fn_promote_student (FUNCTION)</h3>
+    <p>Returns a text message indicating whether the student can be promoted to the next semester,
+    checking for pending backlogs (F grades). Updates semester or marks as graduated.</p>
+  </section>
+
+  <!-- DML -->
+  <section id="dml">
+    <h2 class="sec">8. DML – Seed Data</h2>
+    <p>The <code>/api/seed</code> endpoint parses <code>lib/schema.sql</code> and executes all statements
+    including INSERT statements for 4 departments, 5 courses, 5 students, and 8 grade records using
+    <code>ON CONFLICT DO NOTHING</code> for idempotent re-seeding.</p>
+  </section>
+
+  <!-- JOINS -->
+  <section id="joins">
+    <h2 class="sec">9. Joins Used</h2>
+    <table>
+      <tr><th>Join Type</th><th>Tables</th><th>Purpose</th></tr>
+      <tr><td>INNER JOIN</td><td>grades ⟶ courses</td><td>Grade detail with course info in student profile</td></tr>
+      <tr><td>LEFT JOIN</td><td>students ⟶ grades</td><td>Include students with no grades (CGPA = NULL)</td></tr>
+      <tr><td>INNER JOIN</td><td>students ⟶ departments</td><td>Resolve dept_id FK to name</td></tr>
+      <tr><td>LEFT JOIN</td><td>courses ⟶ grades</td><td>v_course_stats: courses with zero enrolments</td></tr>
+    </table>
+  </section>
+
+  <!-- API -->
+  <section id="api">
+    <h2 class="sec">10. API Reference</h2>
+    <table>
+      <tr><th>Method</th><th>Endpoint</th><th>Description</th><th>Cache</th></tr>
+      <tr>
+        <td><span class="method GET">GET</span></td>
+        <td><code>/api/seed</code></td>
+        <td>Runs full DDL + DML schema (idempotent)</td>
+        <td>no-store</td>
+      </tr>
+      <tr>
+        <td><span class="method GET">GET</span></td>
+        <td><code>/api/students</code></td>
+        <td>All students from v_student_academic + summary stats</td>
+        <td>ISR 30 s</td>
+      </tr>
+      <tr>
+        <td><span class="method POST">POST</span></td>
+        <td><code>/api/students</code></td>
+        <td>Create new student (409 on duplicate roll_no)</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td><span class="method GET">GET</span></td>
+        <td><code>/api/courses</code></td>
+        <td>All courses from v_course_stats</td>
+        <td>ISR 30 s</td>
+      </tr>
+      <tr>
+        <td><span class="method GET">GET</span></td>
+        <td><code>/api/grades?student_id=N</code></td>
+        <td>Grades for a student (JOIN courses)</td>
+        <td>no-store</td>
+      </tr>
+      <tr>
+        <td><span class="method POST">POST</span></td>
+        <td><code>/api/grades</code></td>
+        <td>Calls sp_enrol_student PL/pgSQL procedure</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td><span class="method GET">GET</span></td>
+        <td><code>/api/departments</code></td>
+        <td>Lightweight lookup for form dropdowns</td>
+        <td>no-store</td>
+      </tr>
+    </table>
+  </section>
+
+  <!-- CACHE -->
+  <section id="cache">
+    <h2 class="sec">11. Caching Strategy</h2>
+    <div class="cards">
+      <div class="card">
+        <div class="card-icon">⏱️</div>
+        <h4>ISR – 30 s</h4>
+        <p>Students &amp; Courses list pages use Next.js ISR (<code>revalidate = 30</code>).
+        Static HTML served; DB hit only every 30 s.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🔁</div>
+        <h4>Parallel Queries</h4>
+        <p>Dashboard fires 3 SQL queries in <code>Promise.all()</code> — total latency = slowest query, not sum.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🔌</div>
+        <h4>Neon Connection Pool</h4>
+        <p><code>@neondatabase/serverless</code> uses HTTP + WebSocket pooling — no cold-connection penalty per request.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🗄️</div>
+        <h4>DB Views as Cache</h4>
+        <p>Aggregated views (<code>v_student_academic</code>) centralise JOIN logic; simple <code>SELECT *</code> in routes.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- UI -->
+  <section id="ui">
+    <h2 class="sec">12. UI Architecture</h2>
+    <p>All data-fetching pages are <strong>React Server Components</strong> (zero JS shipped to client for data).
+    Only the Add Student and Grades forms are client components (<code>"use client"</code>) because they need
+    interactivity. Tailwind v4 utility classes are used throughout with no CSS-in-JS overhead.</p>
+
+    <table>
+      <tr><th>Route</th><th>Type</th><th>Data Source</th></tr>
+      <tr><td>/</td><td>Server Component (ISR)</td><td>3 parallel SQL queries</td></tr>
+      <tr><td>/students</td><td>Server Component (ISR)</td><td>v_student_academic view</td></tr>
+      <tr><td>/students/add</td><td>Client Component</td><td>POST /api/students</td></tr>
+      <tr><td>/students/[id]</td><td>Server Component (ISR)</td><td>v_student_academic + grades JOIN</td></tr>
+      <tr><td>/courses</td><td>Server Component (ISR)</td><td>v_course_stats view</td></tr>
+      <tr><td>/grades</td><td>Client Component</td><td>GET /api/grades · POST CALL sp_enrol_student</td></tr>
+    </table>
+  </section>
+
+  <footer style="text-align:center;padding:2rem;color:var(--muted);font-size:.85rem;border-top:1px solid var(--border);margin-top:2rem">
+    Student360 · Built with Next.js 16 + Neon PostgreSQL · &copy; 2024
+  </footer>
+
+</div>
+</body>
+</html>
