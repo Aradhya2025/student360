@@ -45,7 +45,6 @@ CREATE TABLE IF NOT EXISTS grades (
                   WHEN marks >= 80 THEN 'A'
                   WHEN marks >= 70 THEN 'B+'
                   WHEN marks >= 60 THEN 'B'
-                  WHEN marks >= 50 THEN 'C'
                   ELSE 'F'
                 END
               ) STORED,
@@ -167,7 +166,7 @@ SELECT id, 'Thermodynamics',            'ME101', 4, 1 FROM departments WHERE cod
 ON CONFLICT DO NOTHING;
 
 INSERT INTO students (roll_no, first_name, last_name, email, dob, dept_id, semester) VALUES
-  ('CS2401','Aarav',   'Sharma',   'aarav.sharma@s360.edu',  '2005-03-12',
+  ('CS2401','Aradhya',   'Gupta',   'aradhya.gupta@s360.edu',  '2005-03-12',
    (SELECT id FROM departments WHERE code='CS'), 2),
   ('CS2402','Diya',    'Patel',    'diya.patel@s360.edu',    '2005-07-22',
    (SELECT id FROM departments WHERE code='CS'), 2),
